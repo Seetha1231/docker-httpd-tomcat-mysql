@@ -1,0 +1,33 @@
+mysqldb:
+# Pull from docker hub
+  image: mysql:latest
+  environment:
+    MYSQL_ROOT_PASSWORD: secured
+    MYSQL_DATABASE: example_db
+    MYSQL_USER: example_db_user
+    MYSQL_PASSWORD: example_db_pass 
+  volumes: 
+   - ./db:/docker-entrypoint-initdb.d # create db table from sql file
+
+tomcat:
+  build: ./tomcat
+  # image: tomcat
+  restart: always
+  environment:
+    JDBC_URL: jdbc:mysql://mysqldb:3306/example_db
+    JDBC_USER: example_db_user
+    JDBC_PASS: example_db_pass
+    TABLE_NAME: example_table
+  ports:
+    - "8080:8080" 
+  links:
+    - mysqldb
+
+apache:
+  build: ./apache
+  # image: apache
+  restart: always
+  ports:
+    - "80:80"
+  links:
+    - tomcat
